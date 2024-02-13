@@ -4,7 +4,7 @@
 
     <artifactId>codeai</artifactId>
     <groupId>io.morin.codeai</groupId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.0.2</version>
 
     <licenses>
         <license>
@@ -25,7 +25,7 @@
         <connection>scm:git:git@github.com:tmorin/codeai.git</connection>
         <developerConnection>scm:git:git@github.com:tmorin/codeai.git</developerConnection>
         <url>https://github.com/tmorin/codeai</url>
-        <tag>HEAD</tag>
+        <tag>codeai-1.0.2</tag>
     </scm>
 
     <ciManagement>
