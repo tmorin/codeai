@@ -1,6 +1,7 @@
 # CodeAI
 
 > An experimental project leveraging the power of AI to help developers write better code.
+> The project provides a REST server feeding an embedded Neo4j database with codebase data and a REST CLI to interact with the server.
 
 ## Requirements
 
