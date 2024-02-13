@@ -26,7 +26,9 @@ public class RestServer {
     );
 
     if (args.length != 1) {
-      log.error("Usage: RestServer <codebase path>");
+      log.error(
+        "Usage: java -cp codeai.jar io.morin.codeai.restserver.RestServer <codebase path>"
+      );
       System.exit(1);
     }
 

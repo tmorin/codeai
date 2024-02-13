@@ -1,13 +1,25 @@
 # CodeAI
 
 > An experimental project leveraging the power of AI to help developers write better code.
+> The project provides a REST server feeding an embedded Neo4j database with codebase data and a REST CLI to interact with the server.
+
+## Requirements
+
+- Java 21
 
 ## Run
 
-CodeAI is a plain Java application that can be run from the command line. The following command will start the application:
+CodeAI is a plain Java application that can be run from the command line.
+The following command will start the application:
 
+**Start the REST server**
 ```shell
-java -jar codeai-0.0.1-SNAPSHOT.jar
+java -cp codeai.jar io.morin.codeai.restserver.RestServer <codebase path>
+```
+
+**Start the REST CLI**
+```shell
+java -cp codeai.jar io.morin.codeai.restcli.RestCli
 ```
 
 ## Configuration
@@ -44,3 +56,23 @@ codeai_langchain4j_integration=MISTRAL java -jar codeai-0.0.1-SNAPSHOT.jar
 | `codeai.rest_cli.prompt_url`                   | `http://localhost:9090/prompt` |
 
 ## Build
+
+**Build the uber jar**
+```shell
+./mvnw verify
+```
+
+## Maintenance
+
+**Dependencies upgrade**
+```shell
+./mvnw versions:display-dependency-updates
+```
+
+**Release**
+```shell
+./mvnw --batch-mode release:clean \
+&& ./mvnw --batch-mode release:prepare \
+  -DreleaseVersion=X.Y.Z \
+  -DdevelopmentVersion=Y.X.Z-SNAPSHOT
+```
