@@ -7,6 +7,9 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * A scanner for the codebase.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Builder(toBuilder = true)

@@ -12,6 +12,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * An adapter for the {@link CodebaseDocumentRepository} interface that leverage on the {@link EmbeddingStoreIngestor} class.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Builder(toBuilder = true)

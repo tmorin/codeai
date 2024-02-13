@@ -6,6 +6,9 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * This class is used to create an HTTP server.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Builder(toBuilder = true)
@@ -19,6 +22,11 @@ class HttpServerFactory {
   @NonNull
   PromptHandler promptHandler;
 
+  /**
+   * Creates an HTTP server.
+   *
+   * @return the HTTP server
+   */
   @SneakyThrows
   HttpServer create() {
     log.info(

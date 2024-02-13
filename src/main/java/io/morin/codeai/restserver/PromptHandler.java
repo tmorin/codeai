@@ -4,6 +4,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import io.morin.codeai.api.CodeAi;
 import io.morin.codeai.api.SendMessageCommand;
+import io.morin.codeai.api.StreamMessageCommand;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import lombok.*;
@@ -23,58 +25,60 @@ class PromptHandler implements HttpHandler {
   ContentTypeParser contentTypeParser = ContentTypeParser.builder().build();
 
   @Override
-  @SneakyThrows
-  public void handle(HttpExchange exchange) {
-    log.info("Handling request {}", exchange.getRequestURI());
+  public void handle(HttpExchange exchange) throws IOException {
+    try {
+      log.info("Handling request {}", exchange.getRequestURI());
 
-    if (!"POST".equals(exchange.getRequestMethod())) {
-      log.warn("Unsupported method {}", exchange.getRequestMethod());
-      exchange.sendResponseHeaders(405, 0);
-      return;
-    }
-
-    val contentType = contentTypeParser.parse(
-      exchange.getRequestHeaders().getFirst("Content-Type")
-    );
-    log.debug("Content type is {}", contentType);
-
-    if (!"text/plain".equals(contentType.getValue())) {
-      log.warn("Unsupported content type {}", contentType);
-      exchange.sendResponseHeaders(415, 0);
-      try (
-        OutputStreamWriter writer = new OutputStreamWriter(
-          exchange.getResponseBody(),
-          contentType.getCharset()
-        )
-      ) {
-        writer.write("Unsupported content type\n");
+      if (!"POST".equals(exchange.getRequestMethod())) {
+        log.warn("Unsupported method {}", exchange.getRequestMethod());
+        exchange.sendResponseHeaders(405, 0);
+        return;
       }
-      return;
-    }
 
-    val prompt = new String(
-      exchange.getRequestBody().readAllBytes(),
-      StandardCharsets.UTF_8
-    );
-    log.debug("Prompt is {}", prompt);
+      val contentType = contentTypeParser.parse(
+        exchange.getRequestHeaders().getFirst("Content-Type")
+      );
+      log.debug("Content type is {}", contentType);
 
-    val command = SendMessageCommand.builder().prompt(prompt).build();
-    log.debug("Command is {}", command);
+      if (!"text/plain".equals(contentType.getValue())) {
+        log.warn("Unsupported content type {}", contentType);
+        exchange.sendResponseHeaders(415, 0);
+        try (
+          OutputStreamWriter writer = new OutputStreamWriter(
+            exchange.getResponseBody(),
+            contentType.getCharset()
+          )
+        ) {
+          writer.write("Unsupported content type\n");
+        }
+        return;
+      }
 
-    val result = codeAi.execute(
-      SendMessageCommand.builder().prompt(prompt).build()
-    );
-    log.debug("Result is {}", result);
+      val prompt = new String(
+        exchange.getRequestBody().readAllBytes(),
+        StandardCharsets.UTF_8
+      );
+      log.info("Prompt is {}", prompt);
 
-    log.debug("Sending response");
-    exchange.sendResponseHeaders(200, 0);
-    try (
-      OutputStreamWriter writer = new OutputStreamWriter(
-        exchange.getResponseBody(),
-        contentType.getCharset()
-      )
-    ) {
-      writer.write(result.getAnswer());
+      val command = SendMessageCommand.builder().prompt(prompt).build();
+      log.debug("Command is {}", command);
+
+      log.info("Sending response");
+      exchange.sendResponseHeaders(200, 0);
+
+      log.info("Streaming response");
+      codeAi.execute(
+        StreamMessageCommand
+          .builder()
+          .prompt(prompt)
+          .outputStream(exchange.getResponseBody())
+          .build()
+      );
+
+      log.info("Closing response");
+      exchange.close();
+    } catch (IOException e) {
+      log.error("Failed to handle request", e);
     }
   }
 }

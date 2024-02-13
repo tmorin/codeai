@@ -12,6 +12,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ * This Java Main class is used to start the CodeAI REST server.
+ */
 @Slf4j
 public class RestServer {
 

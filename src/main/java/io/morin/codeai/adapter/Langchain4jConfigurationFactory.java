@@ -3,9 +3,12 @@ package io.morin.codeai.adapter;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.AllMiniLmL6V2QuantizedEmbeddingModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
+import dev.langchain4j.model.mistralai.MistralAiStreamingChatModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
@@ -15,6 +18,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.neo4j.driver.GraphDatabase;
 
+/**
+ * A factory for the Langchain4j configuration.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Builder(toBuilder = true)
@@ -41,7 +47,7 @@ class Langchain4jConfigurationFactory {
 
   private ChatLanguageModel createChatLanguageModel() {
     log.info(
-      "create the LLM configuration: {}",
+      "create the LLM synchronous configuration: {}",
       langchain4jSettings.getIntegration()
     );
     return switch (langchain4jSettings.getIntegration()) {
@@ -51,6 +57,25 @@ class Langchain4jConfigurationFactory {
         .modelName(mistralSettings.getModelName())
         .build();
       case OLLAMA -> OllamaChatModel
+        .builder()
+        .baseUrl(ollamaSettings.getBaseUrl())
+        .modelName(ollamaSettings.getModelName())
+        .build();
+    };
+  }
+
+  private StreamingChatLanguageModel createStreamingChatLanguageModel() {
+    log.info(
+      "create the LLM streaming configuration: {}",
+      langchain4jSettings.getIntegration()
+    );
+    return switch (langchain4jSettings.getIntegration()) {
+      case MISTRAL -> MistralAiStreamingChatModel
+        .builder()
+        .apiKey(mistralSettings.getApiKey())
+        .modelName(mistralSettings.getModelName())
+        .build();
+      case OLLAMA -> OllamaStreamingChatModel
         .builder()
         .baseUrl(ollamaSettings.getBaseUrl())
         .modelName(ollamaSettings.getModelName())
@@ -93,6 +118,7 @@ class Langchain4jConfigurationFactory {
           .embeddingStore(neo4jStore)
           .build()
       )
+      .streamingChatLanguageModel(createStreamingChatLanguageModel())
       .chatLanguageModel(createChatLanguageModel())
       .chatMemoryProvider(memoryId ->
         MessageWindowChatMemory.withMaxMessages(

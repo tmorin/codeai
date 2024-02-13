@@ -1,67 +1,81 @@
 package io.morin.codeai.restcli;
 
 import io.morin.codeai.fwk.SettingReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.util.Scanner;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ * This Java main class provide CLI to send prompt to the CodeAI server and stream the response.
+ */
 @Slf4j
 public class RestCli {
 
   @SuppressWarnings({ "java:S106" })
-  @SneakyThrows
   public static void main(String[] args) {
-    try {
-      val scanner = new Scanner(System.in);
-
+    val scanner = new Scanner(System.in);
+    try (val client = HttpClient.newHttpClient()) {
       while (true) {
-        log.info("Please input a line");
-        val prompt = scanner.nextLine();
+        try {
+          log.info("Please input a line");
+          val prompt = scanner.nextLine();
 
-        if (prompt.equals("exit")) {
-          break;
-        }
+          if (prompt.equals("exit")) {
+            break;
+          }
 
-        val url = URI.create(
-          SettingReader.readString(
-            "codeai.rest_cli.prompt_url",
-            "http://localhost:9090/prompt"
-          )
-        );
-
-        val con = (HttpURLConnection) url.toURL().openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty(
-          "Content-Type",
-          String.format(
-            "text/plain; charset=%s",
-            Charset.defaultCharset().name()
-          )
-        );
-        con.setDoOutput(true);
-        con.getOutputStream().write(prompt.getBytes());
-        con.getOutputStream().close();
-
-        val responseCode = con.getResponseCode();
-        if (responseCode == 200) {
-          con.getInputStream().transferTo(System.out);
-        } else {
-          log.error(
-            "Failed to send prompt with {}, try again! :)",
-            responseCode
+          val url = URI.create(
+            SettingReader.readString(
+              "codeai.rest_cli.prompt_url",
+              "http://localhost:9090/prompt"
+            )
           );
-        }
-        System.out.println();
-        System.out.println();
 
-        con.disconnect();
+          val request = HttpRequest
+            .newBuilder()
+            .uri(url)
+            .POST(HttpRequest.BodyPublishers.ofString(prompt))
+            .header(
+              "Content-Type",
+              String.format(
+                "text/plain; charset=%s",
+                Charset.defaultCharset().name()
+              )
+            )
+            .build();
+
+          val response = client.send(
+            request,
+            HttpResponse.BodyHandlers.ofInputStream()
+          );
+
+          val responseCode = response.statusCode();
+          if (responseCode == 200) {
+            try (val inputStream = response.body()) {
+              byte[] buffer = new byte[10];
+              int read;
+              while ((read = inputStream.read(buffer, 0, 10)) >= 0) {
+                System.out.write(buffer, 0, read);
+              }
+            }
+          } else {
+            log.error(
+              "Failed to send prompt with {}, try again! :)",
+              responseCode
+            );
+          }
+
+          System.out.println();
+          System.out.println();
+        } catch (Exception e) {
+          log.error("Failed to send prompt, try again! :)", e);
+        }
       }
-    } catch (IllegalStateException e) {
-      log.info("System.in was closed; exiting");
     }
   }
 }

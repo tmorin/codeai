@@ -7,6 +7,9 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ * The provider for the {@link CodeAiFactory} when using the ServiceLoader API.
+ */
 @Slf4j
 public class CodeAiFactoryProvider implements CodeAiFactory {
 

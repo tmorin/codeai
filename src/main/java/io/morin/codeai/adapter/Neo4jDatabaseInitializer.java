@@ -12,6 +12,9 @@ import org.neo4j.configuration.helpers.SocketAddress;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 
+/**
+ * An initializer for the Neo4J database.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Builder(toBuilder = true)
@@ -40,11 +43,12 @@ class Neo4jDatabaseInitializer {
       );
   }
 
-  enum Status {
-    CREATED,
-    ALREADY_EXISTS,
-  }
-
+  /**
+   * Initializes the Neo4J database.
+   *
+   * @param settings the settings provided by the CodeAi instance.
+   * @return the status of the initialization.
+   */
   Status initialize(CodeAi.Settings settings) {
     val databasePath = Path.of("target/neo4j", settings.getCodebaseName());
 
@@ -63,5 +67,10 @@ class Neo4jDatabaseInitializer {
     log.info("Neo4J database started");
 
     return alreadyInitialized ? Status.ALREADY_EXISTS : Status.CREATED;
+  }
+
+  enum Status {
+    CREATED,
+    ALREADY_EXISTS,
   }
 }

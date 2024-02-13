@@ -7,6 +7,9 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Factory for creating a new instance of {@link CodebaseDocument}.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Builder(toBuilder = true)

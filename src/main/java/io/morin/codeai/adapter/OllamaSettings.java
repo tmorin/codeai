@@ -5,10 +5,16 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+/**
+ * The settings for the Neo4j integration.
+ */
 @Value
 @Builder(toBuilder = true)
 class OllamaSettings {
 
+  /**
+   * The model name to use.
+   */
   @NonNull
   @Builder.Default
   String modelName = SettingReader.readString(
@@ -16,6 +22,9 @@ class OllamaSettings {
     "mistral"
   );
 
+  /**
+   * The base URL to use.
+   */
   @NonNull
   @Builder.Default
   String baseUrl = SettingReader.readString(
