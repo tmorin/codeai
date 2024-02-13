@@ -2,9 +2,14 @@
 
 > An experimental project leveraging the power of AI to help developers write better code.
 
+## Requirements
+
+- Java 21
+
 ## Run
 
-CodeAI is a plain Java application that can be run from the command line. The following command will start the application:
+CodeAI is a plain Java application that can be run from the command line.
+The following command will start the application:
 
 **Start the REST server**
 ```shell
